@@ -1,13 +1,52 @@
-import React, { useCallback } from 'react';
-import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
+import React, { useEffect, useRef } from 'react';
 import * as fabric from 'fabric';
-import './style.css';
 
 const Canvas: React.FC = () => {
-  const { editor, onReady } = useFabricJSEditor();
+  // Référence pour le canevas HTML
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Référence pour l'instance de Fabric.js
+  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
-  const addPostIt = useCallback(() => {
-    if (editor?.canvas) {
+  useEffect(() => {
+    const resizeCanvas = () => {
+      if (canvasRef.current) {
+        const canvas = fabricCanvasRef.current;
+        if (canvas) {
+          // Ajuster la taille du canevas
+          canvas.setWidth(window.innerWidth);
+          canvas.setHeight(window.innerHeight);
+          canvas.renderAll();
+        }
+      }
+    };
+
+    if (canvasRef.current) {
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        backgroundColor: 'red',
+        allowTouchScrolling: true,
+      });
+      fabricCanvasRef.current = canvas;
+
+      // Ajuster la taille du canevas initiale
+      resizeCanvas();
+
+      // Ajouter un écouteur pour redimensionner le canevas lors du redimensionnement de la fenêtre
+      window.addEventListener('resize', resizeCanvas);
+
+      // Nettoyage à la destruction du composant
+      return () => {
+        window.removeEventListener('resize', resizeCanvas);
+        if (fabricCanvasRef.current) {
+          fabricCanvasRef.current.dispose();
+        }
+      };
+    }
+  }, []);
+
+  // Fonction pour ajouter un post-it
+  const addPostIt = () => {
+    const canvas = fabricCanvasRef.current;
+    if (canvas) {
       const textbox = new fabric.Textbox('Post-it', {
         left: 100,
         top: 100,
@@ -21,17 +60,17 @@ const Canvas: React.FC = () => {
         cornerStyle: 'circle',
         cornerSize: 10,
       });
-      editor.canvas.add(textbox);
-      editor.canvas.renderAll();
+      canvas.add(textbox);
+      canvas.renderAll(); // Re-render pour appliquer les changements
     }
-  }, [editor]);
+  };
 
   return (
-    <div>
+    <div className='canvas-container'>
       <button onClick={addPostIt} style={{ marginBottom: '10px' }}>
         Ajouter un Post-it
       </button>
-      <FabricJSCanvas className='canvas' onReady={onReady} />
+      <canvas ref={canvasRef} />
     </div>
   );
 };

@@ -1,8 +1,11 @@
-.canvas {
-  border: 1px solid #ccc;
-  margin-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 1500px;
-  height: 1500px;
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
