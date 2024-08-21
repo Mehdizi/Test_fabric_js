@@ -2,9 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as fabric from 'fabric';
 
 const Canvas: React.FC = () => {
-  // Référence pour le canevas HTML
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // Référence pour l'instance de Fabric.js
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => {
@@ -12,7 +10,6 @@ const Canvas: React.FC = () => {
       if (canvasRef.current) {
         const canvas = fabricCanvasRef.current;
         if (canvas) {
-          // Ajuster la taille du canevas
           canvas.setWidth(window.innerWidth);
           canvas.setHeight(window.innerHeight);
           canvas.renderAll();
@@ -27,17 +24,13 @@ const Canvas: React.FC = () => {
       });
       fabricCanvasRef.current = canvas;
 
-      // Ajuster la taille du canevas initiale
       resizeCanvas();
 
-      // Ajouter un écouteur pour redimensionner le canevas lors du redimensionnement de la fenêtre
       window.addEventListener('resize', resizeCanvas);
 
       canvas.on('mouse:dblclick', (options) => {
-        const pointer = canvas.getPointer(options.e); // Récupérer les coordonnées du double clic
-        console.log(`Double clicked at: X=${pointer.x}, Y=${pointer.y}`);
+        const pointer = canvas.getPointer(options.e);
 
-        // Ajouter un post-it à la position du double clic
         const textbox = new fabric.Textbox('Post-it', {
           left: pointer.x,
           top: pointer.y,
@@ -52,10 +45,9 @@ const Canvas: React.FC = () => {
           cornerSize: 10,
         });
         canvas.add(textbox);
-        canvas.renderAll(); // Re-render pour appliquer les changements
+        canvas.renderAll();
       });
 
-      // Nettoyage à la destruction du composant
       return () => {
         window.removeEventListener('resize', resizeCanvas);
         if (fabricCanvasRef.current) {
@@ -65,7 +57,6 @@ const Canvas: React.FC = () => {
     }
   }, []);
 
-  // Fonction pour ajouter un post-it
   const addPostIt = () => {
     const canvas = fabricCanvasRef.current;
     if (canvas) {
@@ -83,7 +74,7 @@ const Canvas: React.FC = () => {
         cornerSize: 10,
       });
       canvas.add(textbox);
-      canvas.renderAll(); // Re-render pour appliquer les changements
+      canvas.renderAll();
     }
   };
 
