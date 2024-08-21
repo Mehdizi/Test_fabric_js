@@ -33,6 +33,28 @@ const Canvas: React.FC = () => {
       // Ajouter un écouteur pour redimensionner le canevas lors du redimensionnement de la fenêtre
       window.addEventListener('resize', resizeCanvas);
 
+      canvas.on('mouse:dblclick', (options) => {
+        const pointer = canvas.getPointer(options.e); // Récupérer les coordonnées du double clic
+        console.log(`Double clicked at: X=${pointer.x}, Y=${pointer.y}`);
+
+        // Ajouter un post-it à la position du double clic
+        const textbox = new fabric.Textbox('Post-it', {
+          left: pointer.x,
+          top: pointer.y,
+          width: 150,
+          height: 150,
+          backgroundColor: '#ffeb3b',
+          padding: 10,
+          editable: true,
+          borderColor: 'black',
+          cornerColor: 'black',
+          cornerStyle: 'circle',
+          cornerSize: 10,
+        });
+        canvas.add(textbox);
+        canvas.renderAll(); // Re-render pour appliquer les changements
+      });
+
       // Nettoyage à la destruction du composant
       return () => {
         window.removeEventListener('resize', resizeCanvas);
