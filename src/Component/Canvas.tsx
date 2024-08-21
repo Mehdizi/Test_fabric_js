@@ -6,17 +6,6 @@ const Canvas: React.FC = () => {
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => {
-    const resizeCanvas = () => {
-      if (canvasRef.current) {
-        const canvas = fabricCanvasRef.current;
-        if (canvas) {
-          canvas.setWidth(window.innerWidth);
-          canvas.setHeight(window.innerHeight);
-          canvas.renderAll();
-        }
-      }
-    };
-
     if (canvasRef.current) {
       const canvas = new fabric.Canvas(canvasRef.current, {
         backgroundColor: 'red',
@@ -24,9 +13,39 @@ const Canvas: React.FC = () => {
       });
       fabricCanvasRef.current = canvas;
 
+      const resizeCanvas = () => {
+        if (canvasRef.current) {
+          canvas.setWidth(window.innerWidth);
+          canvas.setHeight(window.innerHeight);
+          canvas.renderAll();
+        }
+      };
+
       resizeCanvas();
 
       window.addEventListener('resize', resizeCanvas);
+
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        const canvas = fabricCanvasRef.current;
+        if (canvas) {
+          const zoomFactor = 0.1;
+          const pointer = canvas.getPointer(e);
+
+          const currentZoom = canvas.getZoom();
+          const newZoom =
+            currentZoom * (1 + (e.deltaY > 0 ? -zoomFactor : zoomFactor));
+          const clampedZoom = Math.max(newZoom, 0.1);
+
+          const newPointer = canvas.getPointer(e);
+          const deltaX = newPointer.x / clampedZoom - pointer.x / currentZoom;
+          const deltaY = newPointer.y / clampedZoom - pointer.y / currentZoom;
+
+          canvas.relativePan(new fabric.Point(deltaX, deltaY));
+          canvas.setZoom(clampedZoom);
+          canvas.renderAll();
+        }
+      };
 
       canvas.on('mouse:dblclick', (options) => {
         const pointer = canvas.getPointer(options.e);
@@ -48,8 +67,11 @@ const Canvas: React.FC = () => {
         canvas.renderAll();
       });
 
+      window.addEventListener('wheel', handleWheel);
+
       return () => {
         window.removeEventListener('resize', resizeCanvas);
+        window.removeEventListener('wheel', handleWheel);
         if (fabricCanvasRef.current) {
           fabricCanvasRef.current.dispose();
         }
