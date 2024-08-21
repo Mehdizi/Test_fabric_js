@@ -22,7 +22,6 @@ const Canvas: React.FC = () => {
       };
 
       resizeCanvas();
-
       window.addEventListener('resize', resizeCanvas);
 
       const handleWheel = (e: WheelEvent) => {
@@ -30,19 +29,17 @@ const Canvas: React.FC = () => {
         const canvas = fabricCanvasRef.current;
         if (canvas) {
           const zoomFactor = 0.1;
+          const minZoom = 0.1;
+          const maxZoom = 5;
+
+          let newZoom =
+            canvas.getZoom() * (1 + (e.deltaY > 0 ? -zoomFactor : zoomFactor));
+          newZoom = Math.max(minZoom, Math.min(newZoom, maxZoom));
+
           const pointer = canvas.getPointer(e);
+          const zoomPoint = new fabric.Point(pointer.x, pointer.y);
 
-          const currentZoom = canvas.getZoom();
-          const newZoom =
-            currentZoom * (1 + (e.deltaY > 0 ? -zoomFactor : zoomFactor));
-          const clampedZoom = Math.max(newZoom, 0.1);
-
-          const newPointer = canvas.getPointer(e);
-          const deltaX = newPointer.x / clampedZoom - pointer.x / currentZoom;
-          const deltaY = newPointer.y / clampedZoom - pointer.y / currentZoom;
-
-          canvas.relativePan(new fabric.Point(deltaX, deltaY));
-          canvas.setZoom(clampedZoom);
+          canvas.zoomToPoint(zoomPoint, newZoom);
           canvas.renderAll();
         }
       };
